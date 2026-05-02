@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where node *)",
+      "Bash(where npm *)",
+      "Bash(npm --version)",
+      "Bash(cmd //c \"where /R C:\\\\Users\\\\29399\\\\AppData\\\\Roaming npm 2>nul\")",
+      "Bash(cmd //c \"dir /s /b C:\\\\Users\\\\29399\\\\AppData\\\\Roaming\\\\npm\\\\npm.cmd 2>nul\")",
+      "Bash(cmd //c \"dir /s /b C:\\\\Users\\\\29399\\\\AppData\\\\Local\\\\fnm* 2>nul\")"
+    ]
+  }
+}
