@@ -1,16 +1,27 @@
-import { mockReports } from "./mockData";
+import { supabase } from "@/lib/supabase";
 import { getChecklistStats, getChecklistByProject } from "./checklistService";
 import { getProject } from "./projectService";
 import type { DeliveryReport } from "@/types";
 
-export function getReportByProject(projectId: string): DeliveryReport | undefined {
-  return mockReports.find((r) => r.project_id === projectId);
+export async function getReportByProject(
+  projectId: string
+): Promise<DeliveryReport | null> {
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) return null;
+  return data;
 }
 
-export function generateReportContent(projectId: string): string {
-  const project = getProject(projectId);
-  const stats = getChecklistStats(projectId);
-  const groups = getChecklistByProject(projectId);
+export async function generateReportContent(projectId: string): Promise<string> {
+  const project = await getProject(projectId);
+  const stats = await getChecklistStats(projectId);
+  const groups = await getChecklistByProject(projectId);
 
   if (!project) return "";
 
@@ -46,4 +57,21 @@ export function generateReportContent(projectId: string): string {
   }
 
   return lines.join("\n");
+}
+
+export async function saveReport(
+  projectId: string,
+  content: string
+): Promise<DeliveryReport | null> {
+  const { data, error } = await supabase
+    .from("reports")
+    .insert({ project_id: projectId, content })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("saveReport error:", error);
+    return null;
+  }
+  return data;
 }

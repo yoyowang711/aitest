@@ -1,5 +1,7 @@
 export type ProjectType = "app" | "web" | "backend";
 
+export type ProjectStatus = "editing" | "submitted" | "confirmed";
+
 export type ChecklistStatus = "todo" | "done" | "n_a";
 
 export type UserRole = "designer" | "developer";
@@ -10,6 +12,7 @@ export interface Project {
   id: string;
   name: string;
   type: ProjectType;
+  status: ProjectStatus;
   created_at: string;
 }
 
@@ -20,6 +23,8 @@ export interface ChecklistItem {
   title: string;
   status: ChecklistStatus;
   note: string;
+  required: boolean;
+  category: string;
 }
 
 export interface ChecklistGroup {
@@ -30,13 +35,15 @@ export interface ChecklistGroup {
 export interface Rule {
   id: string;
   type: RuleType;
-  conditions: Record<string, unknown>;
+  categories: string[];
   checklist_template: ChecklistItemTemplate[];
 }
 
 export interface ChecklistItemTemplate {
   group: string;
   title: string;
+  required: boolean;
+  category: string;
 }
 
 export interface DeliveryReport {

@@ -1,19 +1,17 @@
-"use client";
-
-import { use } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import PolishButton from "@/components/PolishButton";
 import { getProject } from "@/services/projectService";
 import { generateReportContent } from "@/services/reportService";
 import { ArrowLeft } from "lucide-react";
 
-export default function ReportPage({
+export default async function ReportPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const project = getProject(id);
+  const { id } = await params;
+  const project = await getProject(id);
 
   if (!project) {
     return (
@@ -23,7 +21,15 @@ export default function ReportPage({
     );
   }
 
-  const content = generateReportContent(id);
+  const content = await generateReportContent(id);
+
+  if (!content) {
+    return (
+      <Layout>
+        <p className="text-gray-500">暂无报告数据</p>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -34,10 +40,12 @@ export default function ReportPage({
         <h1 className="text-2xl font-bold text-gray-900">交付报告</h1>
       </div>
 
+      <PolishButton projectName={project.name} rawContent={content} />
+
       <div className="rounded-lg border border-gray-200 bg-white p-8">
-        <div className="prose prose-sm max-w-none whitespace-pre-wrap font-mono text-sm text-gray-800 leading-relaxed">
+        <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 leading-relaxed font-sans">
           {content}
-        </div>
+        </pre>
       </div>
     </Layout>
   );
