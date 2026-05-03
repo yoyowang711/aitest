@@ -4,12 +4,14 @@ import { getProject } from "./projectService";
 import type { DeliveryReport } from "@/types";
 
 export async function getReportByProject(
-  projectId: string
+  projectId: string,
+  guestId: string
 ): Promise<DeliveryReport | null> {
   const { data, error } = await supabase
     .from("reports")
     .select("*")
     .eq("project_id", projectId)
+    .eq("user_id", guestId)
     .order("created_at", { ascending: false })
     .limit(1)
     .single();
@@ -18,10 +20,13 @@ export async function getReportByProject(
   return data;
 }
 
-export async function generateReportContent(projectId: string): Promise<string> {
+export async function generateReportContent(
+  projectId: string,
+  guestId: string
+): Promise<string> {
   const project = await getProject(projectId);
-  const stats = await getChecklistStats(projectId);
-  const groups = await getChecklistByProject(projectId);
+  const stats = await getChecklistStats(projectId, guestId);
+  const groups = await getChecklistByProject(projectId, guestId);
 
   if (!project) return "";
 
@@ -61,11 +66,12 @@ export async function generateReportContent(projectId: string): Promise<string> 
 
 export async function saveReport(
   projectId: string,
+  guestId: string,
   content: string
 ): Promise<DeliveryReport | null> {
   const { data, error } = await supabase
     .from("reports")
-    .insert({ project_id: projectId, content })
+    .insert({ project_id: projectId, user_id: guestId, content })
     .select()
     .single();
 

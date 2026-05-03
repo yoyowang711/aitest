@@ -3,12 +3,14 @@ import { generateChecklistTemplate } from "@/engine/checklistEngine";
 import type { ChecklistItem, ChecklistGroup, ChecklistStatus, ProjectType } from "@/types";
 
 export async function getChecklistByProject(
-  projectId: string
+  projectId: string,
+  guestId: string
 ): Promise<ChecklistGroup[]> {
   const { data, error } = await supabase
     .from("checklist_items")
     .select("*")
     .eq("project_id", projectId)
+    .eq("user_id", guestId)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -28,9 +30,10 @@ export async function getChecklistByProject(
 
 export async function generateChecklistForProject(
   projectId: string,
-  projectType: ProjectType
+  projectType: ProjectType,
+  guestId: string
 ): Promise<void> {
-  const existing = await getChecklistByProject(projectId);
+  const existing = await getChecklistByProject(projectId, guestId);
   if (existing.length > 0) return;
 
   const templates = generateChecklistTemplate(projectType);
@@ -38,6 +41,7 @@ export async function generateChecklistForProject(
 
   const items = templates.map((t) => ({
     project_id: projectId,
+    user_id: guestId,
     group: t.group,
     title: t.title,
     status: "todo",
@@ -74,8 +78,11 @@ export async function updateChecklistNote(
   if (error) console.error("updateChecklistNote error:", error);
 }
 
-export async function getChecklistStats(projectId: string) {
-  const items = await getChecklistByProject(projectId);
+export async function getChecklistStats(
+  projectId: string,
+  guestId: string
+) {
+  const items = await getChecklistByProject(projectId, guestId);
   const allItems = items.flatMap((g) => g.items);
   const total = allItems.length;
   const done = allItems.filter((i) => i.status === "done").length;

@@ -8,6 +8,7 @@ import ProgressBar from "@/components/ProgressBar";
 import RiskWarnings from "@/components/RiskWarnings";
 import { getProject, updateProjectStatus } from "@/services/projectService";
 import { getRiskWarnings, type RiskWarning } from "@/engine/riskRules";
+import { getGuestId } from "@/lib/guest";
 import {
   getChecklistByProject,
   updateChecklistStatus,
@@ -50,12 +51,14 @@ export default function ProjectDetailPage({
     setProjectStatus(project.status ?? "editing");
     setRiskWarnings(getRiskWarnings(project.type));
 
+    const guestId = getGuestId();
+
     if (!generatedRef.current) {
       generatedRef.current = true;
-      await generateChecklistForProject(id, project.type);
+      await generateChecklistForProject(id, project.type, guestId);
     }
 
-    const checklistGroups = await getChecklistByProject(id);
+    const checklistGroups = await getChecklistByProject(id, guestId);
     setGroups(checklistGroups);
     setLoading(false);
   };

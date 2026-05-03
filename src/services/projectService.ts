@@ -1,10 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import type { Project, ProjectType, ProjectStatus } from "@/types";
 
-export async function getProjects(): Promise<Project[]> {
+export async function getProjects(guestId: string): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
+    .eq("user_id", guestId)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -30,11 +31,12 @@ export async function getProject(id: string): Promise<Project | null> {
 
 export async function createProject(
   name: string,
-  type: ProjectType
+  type: ProjectType,
+  guestId: string
 ): Promise<Project | null> {
   const { data, error } = await supabase
     .from("projects")
-    .insert({ name, type })
+    .insert({ name, type, user_id: guestId })
     .select()
     .single();
 

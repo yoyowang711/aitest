@@ -1,9 +1,34 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import ProjectCard from "@/components/ProjectCard";
 import { getProjects } from "@/services/projectService";
+import { getGuestId } from "@/lib/guest";
+import type { Project } from "@/types";
+import { Loader2 } from "lucide-react";
 
-export default async function DashboardPage() {
-  const projects = await getProjects();
+export default function DashboardPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const guestId = getGuestId();
+    getProjects(guestId).then((data) => {
+      setProjects(data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 size={24} className="animate-spin text-gray-400" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
