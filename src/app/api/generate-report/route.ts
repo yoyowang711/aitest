@@ -8,20 +8,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "缺少参数" }, { status: 400 });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com";
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const baseUrl = "https://api.deepseek.com";
 
     if (!apiKey) {
       return NextResponse.json({ error: "未配置 API Key" }, { status: 500 });
     }
 
-    const prompt = `你是一位资深 UI/UX 设计师。请将以下结构化的设计交付检查记录润色为一段自然、专业的"设计交付说明"，用于交给开发团队。
+    const prompt = `你是一位资深 UI/UX 设计师。请将以下结构化的设计交付检查记录润色为一段自然、专业的"设计交付说明"。
 
 要求：
-- 保留所有原始数据点，不增删内容
-- 用段落形式表达，不要列表格式
-- 语言专业但平实，不要过度包装
-- 风险项用"建议关注"的语气表述
+- 保留所有原始数据点
+- 不要列表
+- 专业但清晰
 
 项目名称：${projectName}
 
@@ -44,21 +43,16 @@ ${rawContent}`;
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("OpenAI API error:", err);
+      console.error("DeepSeek API error:", err);
       return NextResponse.json({ error: "AI 服务暂不可用" }, { status: 502 });
     }
 
     const data = await response.json();
     const polished = data.choices?.[0]?.message?.content ?? "";
 
-    if (!polished) {
-      return NextResponse.json({ error: "AI 返回为空" }, { status: 502 });
-    }
-
     return NextResponse.json({ polished });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error("generate-report error:", msg);
     return NextResponse.json({ error: `服务异常: ${msg}` }, { status: 500 });
   }
 }
